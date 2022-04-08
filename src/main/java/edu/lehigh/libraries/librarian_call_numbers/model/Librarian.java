@@ -14,6 +14,8 @@ public class Librarian {
     public static final String SANITIZED_CALL_NUMBER_PATTERN = SANITIZED_STRING_PATTERN;
 
     private String username;
+    private String lastName;
+    private String firstName;
     private List<String> callNumberPrefixes;
 
 }

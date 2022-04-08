@@ -81,6 +81,11 @@ public class FolioAppService implements AppService {
             // set username
             librarian.setUsername(user.getString("username"));
 
+            // set name
+            JSONObject personal = user.getJSONObject("personal");
+            librarian.setFirstName(personal.getString("firstName"));
+            librarian.setLastName(personal.getString("lastName"));
+
             // parse call number prefixes
             JSONObject customFields = user.getJSONObject("customFields");
             String callNumberPrefixesString = customFields.getString("callNumbers");
