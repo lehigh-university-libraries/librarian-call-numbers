@@ -63,8 +63,12 @@ public class FolioAppService implements AppService {
             responseObject = folioConnection.executeGet(url, queryString);
         }
         catch (Exception e) {
-            log.debug("Cannot load librarians from FOLIO", e);
+            log.error("Cannot load librarians from FOLIO", e);
             throw new LibrarianCallNumbersException("Cannot load librarians from FOLIO.");
+        }
+
+        if (responseObject == null) {
+            return new LinkedList<Librarian>();
         }
 
         JSONArray compositeUsers = responseObject.getJSONArray("compositeUsers");

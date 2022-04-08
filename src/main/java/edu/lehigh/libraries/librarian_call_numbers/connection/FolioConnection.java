@@ -19,6 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 
 import edu.lehigh.libraries.librarian_call_numbers.config.PropertiesConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +95,11 @@ public class FolioConnection {
 
         CloseableHttpResponse response;
         response = client.execute(getRequest);
+
+        if (HttpStatus.NOT_FOUND.value() == response.getStatusLine().getStatusCode()) {
+            return null;
+        }
+
         HttpEntity entity = response.getEntity();
         String responseString = EntityUtils.toString(entity);
         log.debug("Got response with code " + response.getStatusLine() + " and entity " + response.getEntity());
