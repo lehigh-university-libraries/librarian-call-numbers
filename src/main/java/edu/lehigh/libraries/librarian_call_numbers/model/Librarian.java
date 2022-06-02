@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter @Setter @EqualsAndHashCode @ToString
 public class Librarian {
     
-    public static final String SANITIZED_STRING_PATTERN = "^[A-Za-z0-9\\.-_\\s]+$";
+    public static final String SANITIZED_STRING_PATTERN = "^[A-Za-z0-9\\.-_,\\s]+$";
     public static final String SANITIZED_CALL_NUMBER_PATTERN = SANITIZED_STRING_PATTERN;
 
     private String username;
