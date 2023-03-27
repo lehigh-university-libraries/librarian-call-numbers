@@ -95,8 +95,8 @@ public class FolioConnection {
         CloseableHttpResponse response;
         response = client.execute(getRequest);
 
-        if (HttpStatus.NOT_FOUND.value() == response.getStatusLine().getStatusCode()) {
-            return null;
+        if (response.getStatusLine().getStatusCode() > 399) {
+            throw new Exception(response.getStatusLine().getReasonPhrase());
         }
 
         HttpEntity entity = response.getEntity();

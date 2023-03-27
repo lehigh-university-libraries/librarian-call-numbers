@@ -64,7 +64,7 @@ public class FolioAppService implements AppService {
         }
         catch (Exception e) {
             log.error("Cannot load librarians from FOLIO", e);
-            throw new LibrarianCallNumbersException("Cannot load librarians from FOLIO.");
+            throw new LibrarianCallNumbersException("Cannot load librarians from FOLIO: " + e.getMessage());
         }
 
         if (responseObject == null) {
