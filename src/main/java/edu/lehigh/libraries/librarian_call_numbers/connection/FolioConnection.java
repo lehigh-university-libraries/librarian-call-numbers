@@ -80,6 +80,7 @@ public class FolioConnection {
         }
 
         token = response.getFirstHeader(TOKEN_HEADER).getValue();
+        log.info("token: " + token);
         log.debug("got auth response from folio with response code: " + responseCode);
     }
 
@@ -89,6 +90,7 @@ public class FolioConnection {
             .setHeader(TENANT_HEADER, config.getFolio().getTenantId())
             .setHeader(TOKEN_HEADER, token)
             .addParameter("query", queryString)
+            .addParameter("include", "users")
             .build();
 
         CloseableHttpResponse response;
