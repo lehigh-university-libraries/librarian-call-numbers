@@ -55,7 +55,8 @@ public class FolioAppService implements AppService {
         return librarianMatches;
     }
 
-    private List<Librarian> getAllLibrarians() throws LibrarianCallNumbersException {
+    @Override
+    public List<Librarian> getAllLibrarians() throws LibrarianCallNumbersException {
         String url = config.getFolio().getOkapiBaseUrl() + BL_USERS_PATH;
         String queryString = "customFields.callNumbers=\"\"";
         JSONObject responseObject;

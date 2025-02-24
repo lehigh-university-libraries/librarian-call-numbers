@@ -32,4 +32,11 @@ public class AppController {
         return service.findLibrariansForCallNumber(callNumber);
     }
 
+    @GetMapping("/all")
+    List<Librarian> all()
+        throws LibrarianCallNumbersException {
+        log.info("Request: GET /all/ ");
+        return service.getAllLibrarians();
+    }
+
 }
