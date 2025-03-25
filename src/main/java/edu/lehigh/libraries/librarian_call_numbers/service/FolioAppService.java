@@ -35,7 +35,7 @@ public class FolioAppService implements AppService {
             throw new LibrarianCallNumbersException("Cannot find librarians, no call number");
         }
 
-        log.debug("Looking for librarian matches with " + callNumber);
+        log.debug("Looking for librarian matches with call number prefix:" + callNumber);
 
         List<Librarian> librarians = getAllLibrarians();
         List<Librarian> librarianMatches = new LinkedList<Librarian>();
@@ -47,6 +47,32 @@ public class FolioAppService implements AppService {
                 
                 String callNumberPrefix = callNumberPrefixIterator.next();
                 if (callNumber.startsWith(callNumberPrefix)) {
+                    librarianMatches.add(librarian);
+                    break;
+                }
+            }
+        }
+        return librarianMatches;
+    }
+
+    @Override
+    public List<Librarian> findLibrariansForDepartment(String department) throws LibrarianCallNumbersException {
+        if (department == null) {
+            throw new LibrarianCallNumbersException("Cannot find librarians, no department");
+        }
+
+        log.debug("Looking for librarian matches with department substring:" + department);
+
+        List<Librarian> librarians = getAllLibrarians();
+        List<Librarian> librarianMatches = new LinkedList<Librarian>();
+        for (Iterator<Librarian> librarianIterator = librarians.iterator(); librarianIterator.hasNext(); ) {
+            Librarian librarian = librarianIterator.next();
+
+            for (Iterator<String> departmentSubstringIterator = librarian.getDepartmentSubstrings().iterator(); 
+                departmentSubstringIterator.hasNext(); ) {
+                
+                String departmentSubstring = departmentSubstringIterator.next();
+                if (department.contains(departmentSubstring)) {
                     librarianMatches.add(librarian);
                     break;
                 }
@@ -89,10 +115,20 @@ public class FolioAppService implements AppService {
 
             // parse call number prefixes
             JSONObject customFields = user.getJSONObject("customFields");
-            String callNumberPrefixesString = customFields.getString("callNumbers");
-            List<String> callNumberPrefixes = 
+            String callNumberPrefixesString = customFields.optString("callNumbers");
+            if (callNumberPrefixesString.length() > 0) {
+                List<String> callNumberPrefixes = 
                 Arrays.asList(StringUtils.tokenizeToStringArray(callNumberPrefixesString, ", "));
-            librarian.setCallNumberPrefixes(callNumberPrefixes);
+                librarian.setCallNumberPrefixes(callNumberPrefixes);
+            }
+
+            // parse department substrings
+            String departmentSubstringsString = customFields.optString("departments");
+            if (departmentSubstringsString.length() > 0) {
+                List<String> departmentSubstrings = 
+                Arrays.asList(StringUtils.tokenizeToStringArray(departmentSubstringsString, ", "));
+                librarian.setDepartmentSubstrings(departmentSubstrings);
+            }
 
             librarians.add(librarian);
         }

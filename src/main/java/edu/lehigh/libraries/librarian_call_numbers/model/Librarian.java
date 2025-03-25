@@ -1,5 +1,6 @@
 package edu.lehigh.libraries.librarian_call_numbers.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
@@ -16,6 +17,7 @@ public class Librarian {
     private String username;
     private String lastName;
     private String firstName;
-    private List<String> callNumberPrefixes;
+    private List<String> callNumberPrefixes = new LinkedList<String>();
+    private List<String> departmentSubstrings = new LinkedList<String>();
 
 }

@@ -8,6 +8,8 @@ public interface AppService {
     
     public List<Librarian> findLibrariansForCallNumber(String callNumber) throws LibrarianCallNumbersException;
 
+    public List<Librarian> findLibrariansForDepartment(String department) throws LibrarianCallNumbersException;
+
     public List<Librarian> getAllLibrarians() throws LibrarianCallNumbersException;
 
 }

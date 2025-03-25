@@ -26,10 +26,18 @@ public class AppController {
     }
 
     @GetMapping("/search")
-    List<Librarian> search(@RequestParam @Pattern(regexp = Librarian.SANITIZED_CALL_NUMBER_PATTERN) String callNumber)
-        throws LibrarianCallNumbersException {
-        log.info("Request: GET /search/ " + callNumber);
-        return service.findLibrariansForCallNumber(callNumber);
+    List<Librarian> search(
+        @RequestParam(required=false) @Pattern(regexp = Librarian.SANITIZED_CALL_NUMBER_PATTERN) String callNumber,
+        @RequestParam(required=false) String department
+        ) throws LibrarianCallNumbersException {
+
+        log.info("Request: GET /search/ " + callNumber + ", " + department);
+        if (callNumber != null) {
+            return service.findLibrariansForCallNumber(callNumber);
+        }
+        else {
+            return service.findLibrariansForDepartment(department);
+        }
     }
 
     @GetMapping("/all")
