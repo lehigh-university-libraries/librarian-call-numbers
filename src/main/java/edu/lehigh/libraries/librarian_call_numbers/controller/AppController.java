@@ -2,7 +2,7 @@ package edu.lehigh.libraries.librarian_call_numbers.controller;
 
 import java.util.List;
 
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,23 +1,21 @@
 package edu.lehigh.libraries.librarian_call_numbers.connection;
 
+import java.io.IOException;
 import java.net.URI;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpVersion;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpVersion;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONObject;
 
 import edu.lehigh.libraries.librarian_call_numbers.config.PropertiesConfig;
@@ -47,12 +45,12 @@ public class FolioConnection {
     }
 
     private void initConnection() {
-        CredentialsProvider provider = new BasicCredentialsProvider();
-        provider.setCredentials(AuthScope.ANY, 
-            new UsernamePasswordCredentials(config.getFolio().getUsername(), config.getFolio().getPassword()));
+        BasicCredentialsProvider provider = new BasicCredentialsProvider();
+        provider.setCredentials(new AuthScope(null, -1),
+            new UsernamePasswordCredentials(config.getFolio().getUsername(), config.getFolio().getPassword().toCharArray()));
         client = HttpClientBuilder.create()
             .setDefaultCredentialsProvider(provider)
-            .build();                
+            .build();
     }
 
     private void initToken() throws Exception {
@@ -64,28 +62,28 @@ public class FolioConnection {
         postData.put("password", config.getFolio().getPassword());
         postData.put("tenant", config.getFolio().getTenantId());
 
-        HttpUriRequest post = RequestBuilder.post()
+        ClassicHttpRequest post = ClassicRequestBuilder.post()
             .setUri(uri)
             .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
             .setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType()).setVersion(HttpVersion.HTTP_1_1)
             .setHeader(TENANT_HEADER, config.getFolio().getTenantId())
             .setEntity(new StringEntity(postData.toString()))
             .build();
-        CloseableHttpResponse response = client.execute(post);
-        HttpEntity entity = response.getEntity();
-        String responseString = EntityUtils.toString(entity);
-        int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode > 399) {
-            throw new Exception(responseString);
-        }
 
-        token = response.getFirstHeader(TOKEN_HEADER).getValue();
+        token = client.execute(post, response -> {
+            int responseCode = response.getCode();
+            String responseBody = EntityUtils.toString(response.getEntity());
+            if (responseCode > 399) {
+                throw new IOException(responseBody);
+            }
+            log.debug("got auth response from folio with response code: " + responseCode);
+            return response.getFirstHeader(TOKEN_HEADER).getValue();
+        });
         log.info("token: " + token);
-        log.debug("got auth response from folio with response code: " + responseCode);
     }
 
     public JSONObject executeGet(String url, String queryString) throws Exception {
-        HttpUriRequest getRequest = RequestBuilder.get()
+        ClassicHttpRequest getRequest = ClassicRequestBuilder.get()
             .setUri(url)
             .setHeader(TENANT_HEADER, config.getFolio().getTenantId())
             .setHeader(TOKEN_HEADER, token)
@@ -93,19 +91,14 @@ public class FolioConnection {
             .addParameter("include", "users")
             .build();
 
-        CloseableHttpResponse response;
-        response = client.execute(getRequest);
-
-        if (response.getStatusLine().getStatusCode() > 399) {
-            throw new Exception(response.getStatusLine().getReasonPhrase());
-        }
-
-        HttpEntity entity = response.getEntity();
-        String responseString = EntityUtils.toString(entity);
-        log.debug("Got response with code " + response.getStatusLine() + " and entity " + response.getEntity());
-
-        JSONObject jsonObject = new JSONObject(responseString);
-        return jsonObject;
+        return client.execute(getRequest, response -> {
+            if (response.getCode() > 399) {
+                throw new IOException(response.getReasonPhrase());
+            }
+            String responseString = EntityUtils.toString(response.getEntity());
+            log.debug("Got response with code " + response.getCode() + " and entity " + response.getEntity());
+            return new JSONObject(responseString);
+        });
     }
 
 }
