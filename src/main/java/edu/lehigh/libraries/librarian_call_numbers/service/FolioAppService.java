@@ -84,7 +84,7 @@ public class FolioAppService implements AppService {
     @Override
     public List<Librarian> getAllLibrarians() throws LibrarianCallNumbersException {
         String url = config.getFolio().getOkapiBaseUrl() + BL_USERS_PATH;
-        String queryString = "customFields.callNumbers=\"\"";
+        String queryString = "customFields.callNumbers=\"\" or customFields.departments=\"\"";
         JSONObject responseObject;
         try {
             responseObject = folioConnection.executeGet(url, queryString);
