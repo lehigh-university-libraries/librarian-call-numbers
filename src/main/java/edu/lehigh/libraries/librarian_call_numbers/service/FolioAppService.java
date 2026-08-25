@@ -72,7 +72,7 @@ public class FolioAppService implements AppService {
                 departmentSubstringIterator.hasNext(); ) {
                 
                 String departmentSubstring = departmentSubstringIterator.next();
-                if (department.contains(departmentSubstring)) {
+                if (department.toLowerCase().contains(departmentSubstring.toLowerCase())) {
                     librarianMatches.add(librarian);
                     break;
                 }
@@ -118,7 +118,7 @@ public class FolioAppService implements AppService {
             String callNumberPrefixesString = customFields.optString("callNumbers");
             if (callNumberPrefixesString.length() > 0) {
                 List<String> callNumberPrefixes = 
-                Arrays.asList(StringUtils.tokenizeToStringArray(callNumberPrefixesString, ", "));
+                Arrays.asList(StringUtils.tokenizeToStringArray(callNumberPrefixesString, ","));
                 librarian.setCallNumberPrefixes(callNumberPrefixes);
             }
 
@@ -126,7 +126,7 @@ public class FolioAppService implements AppService {
             String departmentSubstringsString = customFields.optString("departments");
             if (departmentSubstringsString.length() > 0) {
                 List<String> departmentSubstrings = 
-                Arrays.asList(StringUtils.tokenizeToStringArray(departmentSubstringsString, ", "));
+                Arrays.asList(StringUtils.tokenizeToStringArray(departmentSubstringsString, ","));
                 librarian.setDepartmentSubstrings(departmentSubstrings);
             }
 
